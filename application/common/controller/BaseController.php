@@ -9,7 +9,7 @@ class BaseController extends Controller{
         \Input::noGPC();
         //初始化网站配置
         if (false === $setting = cache('setting')) {
-//            $setting = model('setting')->setting_cache();
+            $setting = model('setting')->setting_cache();
         }
         config($setting);
         //发送邮件
@@ -72,8 +72,8 @@ class BaseController extends Controller{
      * 上传文件默认规则定义
      */
     protected function _upload_init($upload) {
-        $allow_max = C('pin_attr_allow_size'); //读取配置
-        $allow_exts = explode(',', C('pin_attr_allow_exts')); //读取配置
+        $allow_max = config('pin_attr_allow_size'); //读取配置
+        $allow_exts = explode(',', config('pin_attr_allow_exts')); //读取配置
         $allow_max && $upload->maxSize = $allow_max * 1024;   //文件大小限制
         $allow_exts && $upload->allowExts = $allow_exts;  //文件类型限制
         $upload->saveRule = 'uniqid';
@@ -86,7 +86,7 @@ class BaseController extends Controller{
     protected function _upload($file, $dir = '', $thumb = array(), $save_rule='uniqid') {
         $upload = new UploadFile();
         if ($dir) {
-            $upload_path = C('pin_attach_path') . $dir . '/';
+            $upload_path = config('pin_attach_path') . $dir . '/';
             $upload->savePath = $upload_path;
         }
         if ($thumb) {

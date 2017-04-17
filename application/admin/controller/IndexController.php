@@ -7,7 +7,7 @@ class IndexController extends BackendController {
 
     public function _initialize() {
         parent::_initialize();
-//        $this->_mod = D('menu');
+        $this->_mod = model('menu');
     }
 
     public function index() {

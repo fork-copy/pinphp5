@@ -6,17 +6,18 @@
  */
 namespace app\common\controller;
 
-class BackendController extends \app\common\controller\BaseController
+use app\common\controller\BaseController;
+class BackendController extends BaseController
 {
     protected $_name = '';
     protected $menuid = 0;
     public function _initialize() {
         parent::_initialize();
-        $this->_name = $this->getActionName();
+        $this->_name = $this->request->action();
         $this->check_priv();
         $this->menuid = $this->_request('menuid', 'trim', 0);
         if ($this->menuid) {
-            $sub_menu = D('menu')->sub_menu($this->menuid, $this->big_menu);
+            $sub_menu = model('menu')->sub_menu($this->menuid, $this->big_menu);
             $selected = '';
             foreach ($sub_menu as $key=>$val) {
                 $sub_menu[$key]['class'] = '';
@@ -229,22 +230,24 @@ class BackendController extends \app\common\controller\BaseController
     }
 
     public function check_priv() {
-        if (MODULE_NAME == 'attachment') {
+        $moduleName=$this->request->module();
+        $acctionName=$this->request->action();
+        if ($moduleName == 'attachment') {
             return true;
         }
-        if ( (!isset($_SESSION['admin']) || !$_SESSION['admin']) && !in_array(ACTION_NAME, array('login','verify_code')) ) {
+        if ( (!isset($_SESSION['admin']) || !$_SESSION['admin']) && !in_array($acctionName, array('login','verify_code')) ) {
             $this->redirect('index/login');
         }
-        if($_SESSION['admin']['role_id'] == 1) {
+        if(session('admin.role_id') == 1) {
             return true;
         }
-        if (in_array(MODULE_NAME, explode(',', 'index'))) {
+        if (in_array($moduleName, explode(',', 'index'))) {
             return true;
         }
-        $menu_mod = M('menu');
-        $menu_id = $menu_mod->where(array('module_name'=>MODULE_NAME, 'action_name'=>ACTION_NAME))->getField('id');
+        $menu_mod = model('menu');
+        $menu_id = $menu_mod->where(array('module_name'=>$moduleName, 'action_name'=>$acctionName))->getField('id');
         //$priv_mod = D('admin_role_priv');
-        $priv_mod = D('admin_auth');
+        $priv_mod = model('admin_auth');
         $r = $priv_mod->where(array('menu_id'=>$menu_id, 'role_id'=>$_SESSION['pp_admin']['role_id']))->count();
         if (!$r) {
             $this->error(L('_VALID_ACCESS_'));
